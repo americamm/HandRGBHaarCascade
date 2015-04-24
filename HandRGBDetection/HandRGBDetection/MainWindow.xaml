@@ -7,12 +7,14 @@
         <Image Height="381" HorizontalAlignment="Left" Margin="32,140,0,0" Name="imageKinect" Stretch="Fill" VerticalAlignment="Top" Width="369
                " />
         <Slider Height="43" HorizontalAlignment="Left" Margin="24,584,0,0" Name="anguloSlider" VerticalAlignment="Top" Width="550" Maximum="27" Minimum="-27" Orientation="Horizontal" TickPlacement="Both" SmallChange="1" ValueChanged="anguloSlider_ValueChanged" />
-        <CheckBox Content="Iluminación " Height="24" HorizontalAlignment="Left" Margin="195,27,0,0" Name="iluminacion" VerticalAlignment="Top" Width="84" Checked="iluminacion_Checked" />
-        <CheckBox Height="19" HorizontalAlignment="Left" Margin="195,61,0,0" Name="unaMano" VerticalAlignment="Top" Width="97" Content="Una mano" IsEnabled="False" Checked="unaMano_Checked" />
-        <CheckBox Content="No iluminación" Height="16" HorizontalAlignment="Left" Margin="353,27,0,0" Name="noiluminacion" VerticalAlignment="Top" Width="188" Checked="noiluminacion_Checked" />
-        <CheckBox Content="Dos manos" Height="19" HorizontalAlignment="Left" Margin="353,61,0,0" Name="dosManos" VerticalAlignment="Top" Width="85" IsEnabled="False" Checked="dosManos_Checked" />
-        <Button Content="Grabar" Height="35" HorizontalAlignment="Left" Margin="602,37,0,0" Name="botonGrabar" VerticalAlignment="Top" Width="118" Click="botonGrabar_Click" />
+        <CheckBox Content="Iluminación " Height="24" HorizontalAlignment="Left" Margin="370,25,0,0" Name="iluminacion" VerticalAlignment="Top" Width="84" Checked="iluminacion_Checked" IsEnabled="False" />
+        <CheckBox Height="19" HorizontalAlignment="Left" Margin="526,22,0,0" Name="unaMano" VerticalAlignment="Top" Width="97" Content="Una mano" IsEnabled="False" Checked="unaMano_Checked" />
+        <CheckBox Content="No iluminación" Height="16" HorizontalAlignment="Left" Margin="370,57,0,0" Name="noiluminacion" VerticalAlignment="Top" Width="188" Checked="noiluminacion_Checked" IsEnabled="False" />
+        <CheckBox Content="Dos manos" Height="19" HorizontalAlignment="Left" Margin="526,61,0,0" Name="dosManos" VerticalAlignment="Top" Width="85" IsEnabled="False" Checked="dosManos_Checked" />
+        <Button Content="Grabar" Height="35" HorizontalAlignment="Left" Margin="702,38,0,0" Name="botonGrabar" VerticalAlignment="Top" Width="118" Click="botonGrabar_Click" />
         <Label Content="Obtener imágenes:" Height="34" HorizontalAlignment="Left" Margin="24,22,0,0" Name="label1" VerticalAlignment="Top" Width="118" FontWeight="Bold" />
         <CheckBox Content="Mover ángulo del kinect" Height="22" HorizontalAlignment="Right" Margin="0,584,38,0" Name="moverKinect" VerticalAlignment="Top" Width="173" Checked="moverKinect_Checked" />
+        <CheckBox Content="Fondo Simple" Height="22" HorizontalAlignment="Left" Margin="189,27,0,0" Name="simple" VerticalAlignment="Top" Width="118" Checked="simple_Checked" />
+        <CheckBox Content="Fondo Complejo" Height="23" HorizontalAlignment="Left" Margin="189,0,0,595" Name="complejo" VerticalAlignment="Bottom" Width="137" Checked="complejo_Checked" />
     </Grid>
 </Window>
