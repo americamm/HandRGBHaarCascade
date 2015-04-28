@@ -55,6 +55,14 @@ namespace HandDetectionFusion {
         #line default
         #line hidden
         
+        
+        #line 8 "..\..\..\MainWindow.xaml"
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+        internal System.Windows.Controls.Image rgbDepth;
+        
+        #line default
+        #line hidden
+        
         private bool _contentLoaded;
         
         /// <summary>
@@ -104,6 +112,9 @@ namespace HandDetectionFusion {
             return;
             case 3:
             this.colorStreamKinect = ((System.Windows.Controls.Image)(target));
+            return;
+            case 4:
+            this.rgbDepth = ((System.Windows.Controls.Image)(target));
             return;
             }
             this._contentLoaded = true;

@@ -33,17 +33,22 @@ namespace HandDetectionFusion
         private byte[] ColorImagenPixeles;
         private DepthImageStream DepthStream;
         private byte[] DepthImagenPixeles; 
-        private short[] DepthValoresStream; 
+        private short[] DepthValoresStream;
+        private byte[] pixelesDepthRGB;
 
         private WriteableBitmap colorWBitmap; 
         private Int32Rect RectColor;
         private int StrideColor; 
         private WriteableBitmap depthWBitmap;  
         private Int32Rect RectDepth; 
-        private int StrideDepth; 
-        
+        private int StrideDepth;
+
+        private ColorImagePoint[] mappedDepthPoints;
+        private DepthImagePixel[] depthPixels;
+
         private Image<Bgra, Byte> colorFrameKinect;
-        private Image<Gray, Byte> depthFrameKinect; 
+        private Image<Gray, Byte> depthFrameKinect;
+        //private Image<Bgra, Byte> mappedDepthRGB; 
 
         private CascadeClassifier haarColor;
         private CascadeClassifier haarDepth; 
@@ -166,7 +171,7 @@ namespace HandDetectionFusion
                 }
                 catch
                 {
-                    MessageBox.Show("No se pueden leer los datos del sensor", "Error");
+                    MessageBox.Show("No se pueden leer los datos de color del sensor", "Error");
                 }
             }
 
@@ -175,7 +180,7 @@ namespace HandDetectionFusion
 
 
         private Image<Gray, Byte> PollDepth()
-        {
+        { 
             if (this.Kinect != null)
             {
                 this.DepthStream = this.Kinect.DepthStream;
@@ -187,9 +192,14 @@ namespace HandDetectionFusion
                 {
                     using (DepthImageFrame frame = this.Kinect.DepthStream.OpenNextFrame(100))
                     {
-                        if (frame != null)
+                        if (frame != null) 
                         {
+                            mappedDepthPoints = new ColorImagePoint[frame.PixelDataLength];
+                            depthPixels = new DepthImagePixel[frame.PixelDataLength];
+                            pixelesDepthRGB = new byte[frame.PixelDataLength];
+                            
                             frame.CopyPixelDataTo(this.DepthValoresStream);
+                            frame.CopyDepthImagePixelDataTo(depthPixels);
 
                             int index = 0;
                             for (int i = 0; i < frame.PixelDataLength; i++)
@@ -209,16 +219,23 @@ namespace HandDetectionFusion
                                     byte byteDistancia = (byte)(255 - (valorDistancia >> 5));
                                     DepthImagenPixeles[index] = byteDistancia;
                                 }
-                                index++; //= index + 4;
+                                index++; //= index + 4; 
+
+                                
                             }
 
+                            Kinect.CoordinateMapper.MapDepthFrameToColorFrame(DepthImageFormat.Resolution640x480Fps30, depthPixels, ColorImageFormat.RgbResolution640x480Fps30, mappedDepthPoints);
+
+                            mappedDepthPoints.Cast(byte).CopyTo(pixelesDepthRGB); 
+
                             depthFrameKinect.Bytes = DepthImagenPixeles; //The bytes are converted to a Imagen(Emgu). This to work with the functions of opencv. 
+                            depthFrameKinect.SmoothMedian(3); 
                         }
                     }
                 }
                 catch
                 {
-                    MessageBox.Show("No se pueden leer los datos del sensor", "Error");
+                    MessageBox.Show("No se pueden leer los datos de profundidad del sensor", "Error");
                 }
             }
 
@@ -263,7 +280,7 @@ namespace HandDetectionFusion
         {
             if (frame != null)
             {
-                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.4, 0, new System.Drawing.Size(frame.Width / 9, frame.Height / 9), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
+                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.4, -1, new System.Drawing.Size(frame.Width / 9, frame.Height / 9), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
 
                 foreach (System.Drawing.Rectangle roi in hands)
                 {
@@ -273,7 +290,9 @@ namespace HandDetectionFusion
             }
 
             return frame;
-        }//finaliza detection()
+        }//finaliza detection() 
+
+
 
         //::::::::::::Turn it off the kinect:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         private void Window_Unloaded(object sender, RoutedEventArgs e)

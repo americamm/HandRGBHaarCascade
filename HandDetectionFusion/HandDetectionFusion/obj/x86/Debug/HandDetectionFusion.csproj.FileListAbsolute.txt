@@ -1,11 +1,3 @@
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\MainWindow.baml
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\MainWindow.g.cs
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\App.g.cs
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion_Content.g.cs
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion_MarkupCompile.cache
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.g.resources
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.Properties.Resources.resources
-C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.csproj.GenerateResource.Cache
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\bin\Debug\cvextern.dll
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\bin\Debug\OpenCL.dll
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\bin\Debug\opencv_calib3d2410.dll
@@ -34,5 +26,14 @@ C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionF
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\bin\Debug\Emgu.CV.xml
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\bin\Debug\Emgu.CV.UI.xml
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\bin\Debug\Emgu.Util.xml
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\MainWindow.baml
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\MainWindow.g.cs
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\App.g.cs
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion_Content.g.cs
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion_MarkupCompile.cache
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.g.resources
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.Properties.Resources.resources
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.csproj.GenerateResource.Cache
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.exe
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.pdb
+C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.csprojResolveAssemblyReference.cache
