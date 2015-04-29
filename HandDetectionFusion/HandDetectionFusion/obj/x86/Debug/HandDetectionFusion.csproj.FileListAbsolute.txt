@@ -37,3 +37,5 @@ C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionF
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.exe
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.pdb
 C:\Users\America\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.csprojResolveAssemblyReference.cache
+C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.exe
+C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\HandDetectionFusion\HandDetectionFusion\obj\x86\Debug\HandDetectionFusion.pdb
