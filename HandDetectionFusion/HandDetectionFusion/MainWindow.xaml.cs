@@ -48,7 +48,6 @@ namespace HandDetectionFusion
 
         private Image<Bgra, Byte> colorFrameKinect;
         private Image<Gray, Byte> depthFrameKinect;
-        //private Image<Bgra, Byte> mappedDepthRGB; 
 
         private CascadeClassifier haarColor;
         private CascadeClassifier haarDepth; 
@@ -180,7 +179,10 @@ namespace HandDetectionFusion
 
 
         private Image<Gray, Byte> PollDepth()
-        { 
+        {
+            var pixelFormat = PixelFormats.Bgra32;
+            var outputBytesPerPixel = pixelFormat.BitsPerPixel / 8;
+
             if (this.Kinect != null)
             {
                 this.DepthStream = this.Kinect.DepthStream;
@@ -224,11 +226,25 @@ namespace HandDetectionFusion
                                 
                             }
 
+                            int outputIndex = 0; 
+
                             Kinect.CoordinateMapper.MapDepthFrameToColorFrame(DepthImageFormat.Resolution640x480Fps30, depthPixels, ColorImageFormat.RgbResolution640x480Fps30, mappedDepthPoints);
+                            for (int depthIndex = 0; depthIndex < depthPixels.Length; depthIndex++, outputIndex += outputBytesPerPixel)
+                            {
+                                ColorImagePoint point = mappedDepthPoints[depthIndex];
 
-                            mappedDepthPoints.Cast(byte).CopyTo(pixelesDepthRGB); 
+                                int colorPixelIndex = (point.X * 4) + (point.Y * 4);
 
-                            depthFrameKinect.Bytes = DepthImagenPixeles; //The bytes are converted to a Imagen(Emgu). This to work with the functions of opencv. 
+                                pixelesDepthRGB[outputIndex] = ColorImagenPixeles[colorPixelIndex + 0];
+                                pixelesDepthRGB[outputIndex+1] = ColorImagenPixeles[colorPixelIndex + 1];
+                                pixelesDepthRGB[outputIndex+2] = ColorImagenPixeles[colorPixelIndex + 2];
+                                //pixelesDepthRGB[outputIndex+3] = ColorImagenPixeles[colorPixelIndex + 0];
+
+                            }
+
+                                //mappedDepthPoints.Cast(byte).CopyTo(pixelesDepthRGB); 
+
+                                depthFrameKinect.Bytes = DepthImagenPixeles; //The bytes are converted to a Imagen(Emgu). This to work with the functions of opencv. 
                             depthFrameKinect.SmoothMedian(3); 
                         }
                     }
