@@ -41,6 +41,9 @@ namespace DepthToColor
         private WriteableBitmap colorWBitmap;
         private Int32Rect RectColor;
         private int StrideColor;
+        private WriteableBitmap outputWBitmap;
+        private Int32Rect RectOutput;
+        private int StrideOutput; 
         private WriteableBitmap depthWBitmap;
         private Int32Rect RectDepth;
         private int StrideDepth;  
@@ -114,12 +117,34 @@ namespace DepthToColor
                             colorFrame.CopyPixelDataTo(ColorPixeles);
                             depthFrame.CopyDepthImagePixelDataTo(depthImagePixel);
 
+                            int index = 0;
+                            for (int i = 0; i < depthFrame.PixelDataLength; i++)
+                            {
+                                int valorDistancia = DepthValues[i] >> 3;
+
+                                if (valorDistancia == this.Kinect.DepthStream.UnknownDepth)
+                                {
+                                    DepthPixeles[index] = 0;
+                                }
+                                else if (valorDistancia == this.Kinect.DepthStream.TooFarDepth)
+                                {
+                                    DepthPixeles[index] = 0;
+                                }
+                                else
+                                {
+                                    byte byteDistancia = (byte)(255 - (valorDistancia >> 5));
+                                    DepthPixeles[index] = byteDistancia;
+                                }
+                                index++; //= index + 4; 
+                            }
+
+
                             StrideColor = colorFrame.BytesPerPixel * colorFrame.Width;
 
                             output = new byte[DepthStream.FrameWidth * DepthStream.FrameHeight * outputBytesPerPixel];
 
-                            int outputIndex = 0;
-
+                            int outputIndex = 0; 
+                         
                             ColorCoordinates = new ColorImagePoint[depthFrame.PixelDataLength];
                             //depthImagePixel = new DepthImagePixel[depthFrame.PixelDataLength];
 
@@ -140,9 +165,21 @@ namespace DepthToColor
                             this.RectColor = new Int32Rect(0, 0, ColorStream.FrameWidth, ColorStream.FrameHeight);
                             this.StrideColor = ColorStream.FrameWidth * ColorStream.FrameBytesPerPixel;
 
-                            colorWBitmap.WritePixels(RectColor, output, StrideColor, 0);
+                            this.outputWBitmap = new WriteableBitmap(ColorStream.FrameWidth, ColorStream.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
+                            this.RectOutput = new Int32Rect(0, 0, ColorStream.FrameWidth, ColorStream.FrameHeight);
+                            //this.StrideColor = ColorStream.FrameWidth * ColorStream.FrameBytesPerPixel;
 
-                            DepthAndColorImage.Source = colorWBitmap;
+                            this.depthWBitmap = new WriteableBitmap(DepthStream.FrameWidth, DepthStream.FrameHeight, 96, 96, PixelFormats.Gray8, null);
+                            this.RectDepth = new Int32Rect(0, 0, DepthStream.FrameWidth, DepthStream.FrameHeight);
+                            this.StrideDepth = DepthStream.FrameWidth; 
+
+                            outputWBitmap.WritePixels(RectColor, output, StrideColor, 0);
+                            colorWBitmap.WritePixels(RectColor, ColorPixeles, StrideColor, 0);
+                            depthWBitmap.WritePixels(RectColor, DepthPixeles, StrideDepth, 0);
+
+                            DepthAndColorImage.Source = outputWBitmap;
+                            colorImage.Source = colorWBitmap;
+                            depthImage.Source = depthWBitmap; 
                         }
                     }
                 }

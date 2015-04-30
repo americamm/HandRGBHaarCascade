@@ -9,3 +9,15 @@ C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj
 C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.csproj.GenerateResource.Cache
 C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.exe
 C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.pdb
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.exe
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.pdb
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\bin\Debug\DepthToColor.exe
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\bin\Debug\DepthToColor.pdb
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.csprojResolveAssemblyReference.cache
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\MainWindow.baml
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\MainWindow.g.cs
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\App.g.cs
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor_MarkupCompile.cache
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.g.resources
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.Properties.Resources.resources
+C:\Users\America\Documents\HandRGBHaarCascade\DepthToColor\DepthToColor\obj\x86\Debug\DepthToColor.csproj.GenerateResource.Cache

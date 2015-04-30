@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="437" Width="782" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <Grid>
-        <Image Height="322" HorizontalAlignment="Left" Margin="171,41,0,0" Name="DepthAndColorImage" Stretch="Fill" VerticalAlignment="Top" Width="443" />
+        <Image Height="323" HorizontalAlignment="Left" Margin="267,48,0,0" Name="DepthAndColorImage" Stretch="Fill" VerticalAlignment="Top" Width="227" />
+        <Image Height="323" HorizontalAlignment="Left" Margin="20,25,0,0" Name="depthImage" Stretch="Fill" VerticalAlignment="Top" Width="217" />
+        <Image Height="323" HorizontalAlignment="Left" Margin="525,25,0,0" Name="colorImage" Stretch="Fill" VerticalAlignment="Top" Width="211" />
     </Grid>
 </Window>
