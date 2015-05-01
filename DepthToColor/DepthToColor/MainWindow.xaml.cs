@@ -12,7 +12,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Kinect;
-using System.Drawing; 
+using System.Drawing;  
+using Emgu.CV; 
+using Emgu.CV.CvEnum; 
+using Emgu.CV.Structure; 
+using Emgu.Util;
 
 
 
@@ -34,9 +38,11 @@ namespace DepthToColor
         private byte[] ColorPixeles;
         private byte[] DepthPixeles;
         private short[] DepthValues;
+        private byte[] output;
 
-        private byte[] output; 
-        private byte[] mappedValues;
+        private Image<Bgra, Byte> ImagenColor;
+        private Image<Gray, Byte> ImagenDepth;
+        private Image<Bgra, Byte> ImagenMappedDepth; 
 
         private WriteableBitmap colorWBitmap;
         private Int32Rect RectColor;
@@ -88,23 +94,48 @@ namespace DepthToColor
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
-            PollData(); 
+            List<byte[]> kinectArrayBytes = new List<byte[]>();
+            byte[] colorArray;
+            byte[] depthArray;
+            byte[] mappedArray;
+            Image<Bgra, Byte> imagenColor = new Image<Bgra,Byte>(640,480);
+            Image<Gray, Byte> imagenDepth = new Image<Gray, Byte>(640,480);
+            Image<Bgra, Byte> imagenMapped = new Image<Bgra,Byte>(640,480);
+
+            Image<Bgra, Byte> colorDetection = new Image<Bgra, Byte>(640, 480);
+            Image<Gray, Byte> colorGray = new Image<Gray, Byte>(640, 480);
+            Image<Gray, Byte> grayDetection = new Image<Gray, Byte>(640, 480);
+            Image<Gray, Byte> depthDetection = new Image<Gray, Byte>(640, 480); 
+            
+            kinectArrayBytes = PollData();
+
+            imagenColor.Bytes = kinectArrayBytes[0];
+            imagenDepth.Bytes = kinectArrayBytes[1];
+            imagenMapped.Bytes = kinectArrayBytes[2]; 
+
+
         }//end CompositionTarget_Rendering
 
 
-        private void PollData()
+        private List<byte[]> PollData()
         {
+            List<byte[]> ArrayList = new List<byte[]>(); 
+
             if (this.Kinect != null)
-            {
+            {   
+                var pixelFormat = PixelFormats.Bgra32;
+                var outputBytesPerPixel = pixelFormat.BitsPerPixel / 8;
+                
                 this.ColorStream = this.Kinect.ColorStream; 
                 this.DepthStream = this.Kinect.DepthStream;
+
                 this.DepthValues = new short[DepthStream.FramePixelDataLength];
                 this.DepthPixeles = new byte[DepthStream.FramePixelDataLength];
                 this.ColorPixeles = new byte[ColorStream.FramePixelDataLength];
+                this.output = new byte[DepthStream.FrameWidth * DepthStream.FrameHeight * outputBytesPerPixel];
                 this.depthImagePixel = new DepthImagePixel[DepthStream.FramePixelDataLength];
-
-                var pixelFormat = PixelFormats.Bgra32;
-                var outputBytesPerPixel = pixelFormat.BitsPerPixel / 8;
+                this.ColorCoordinates = new ColorImagePoint[DepthStream.FramePixelDataLength];
+                
 
                 try
                 {
@@ -113,42 +144,31 @@ namespace DepthToColor
                     {
                         if (colorFrame != null && depthFrame != null)
                         {
+                            StrideColor = colorFrame.BytesPerPixel * colorFrame.Width;
+                            int outputIndex = 0; 
+
+
                             depthFrame.CopyPixelDataTo(DepthValues);
                             colorFrame.CopyPixelDataTo(ColorPixeles);
                             depthFrame.CopyDepthImagePixelDataTo(depthImagePixel);
 
-                            int index = 0;
+
                             for (int i = 0; i < depthFrame.PixelDataLength; i++)
                             {
                                 int valorDistancia = DepthValues[i] >> 3;
 
-                                if (valorDistancia == this.Kinect.DepthStream.UnknownDepth)
-                                {
-                                    DepthPixeles[index] = 0;
-                                }
-                                else if (valorDistancia == this.Kinect.DepthStream.TooFarDepth)
-                                {
-                                    DepthPixeles[index] = 0;
-                                }
+                                if ((valorDistancia == this.Kinect.DepthStream.UnknownDepth)) /*|| (valorDistancia == this.Kinect.DepthStream.TooFarDepth))*/
+                                    DepthPixeles[i] = 0;
                                 else
                                 {
                                     byte byteDistancia = (byte)(255 - (valorDistancia >> 5));
-                                    DepthPixeles[index] = byteDistancia;
+                                    DepthPixeles[i] = byteDistancia;
                                 }
-                                index++; //= index + 4; 
-                            }
+                            } 
 
 
-                            StrideColor = colorFrame.BytesPerPixel * colorFrame.Width;
+                            Kinect.CoordinateMapper.MapDepthFrameToColorFrame(depthFrame.Format, depthImagePixel, colorFrame.Format, ColorCoordinates);
 
-                            output = new byte[DepthStream.FrameWidth * DepthStream.FrameHeight * outputBytesPerPixel];
-
-                            int outputIndex = 0; 
-                         
-                            ColorCoordinates = new ColorImagePoint[depthFrame.PixelDataLength];
-                            //depthImagePixel = new DepthImagePixel[depthFrame.PixelDataLength];
-
-                            this.Kinect.CoordinateMapper.MapDepthFrameToColorFrame(depthFrame.Format, depthImagePixel, colorFrame.Format, ColorCoordinates);
 
                             for (int depthIndex = 0; depthIndex < depthImagePixel.Length; depthIndex++, outputIndex += outputBytesPerPixel)
                             {
@@ -158,28 +178,11 @@ namespace DepthToColor
                                 output[outputIndex] = ColorPixeles[colorPixelIndex + 0];
                                 output[outputIndex + 1] = ColorPixeles[colorPixelIndex + 1];
                                 output[outputIndex + 2] = ColorPixeles[colorPixelIndex + 2];
-
                             }
 
-                            this.colorWBitmap = new WriteableBitmap(ColorStream.FrameWidth, ColorStream.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
-                            this.RectColor = new Int32Rect(0, 0, ColorStream.FrameWidth, ColorStream.FrameHeight);
-                            this.StrideColor = ColorStream.FrameWidth * ColorStream.FrameBytesPerPixel;
-
-                            this.outputWBitmap = new WriteableBitmap(ColorStream.FrameWidth, ColorStream.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
-                            this.RectOutput = new Int32Rect(0, 0, ColorStream.FrameWidth, ColorStream.FrameHeight);
-                            //this.StrideColor = ColorStream.FrameWidth * ColorStream.FrameBytesPerPixel;
-
-                            this.depthWBitmap = new WriteableBitmap(DepthStream.FrameWidth, DepthStream.FrameHeight, 96, 96, PixelFormats.Gray8, null);
-                            this.RectDepth = new Int32Rect(0, 0, DepthStream.FrameWidth, DepthStream.FrameHeight);
-                            this.StrideDepth = DepthStream.FrameWidth; 
-
-                            outputWBitmap.WritePixels(RectColor, output, StrideColor, 0);
-                            colorWBitmap.WritePixels(RectColor, ColorPixeles, StrideColor, 0);
-                            depthWBitmap.WritePixels(RectColor, DepthPixeles, StrideDepth, 0);
-
-                            DepthAndColorImage.Source = outputWBitmap;
-                            colorImage.Source = colorWBitmap;
-                            depthImage.Source = depthWBitmap; 
+                            ArrayList.Add(ColorPixeles);
+                            ArrayList.Add(DepthPixeles);
+                            ArrayList.Add(output);
                         }
                     }
                 }
@@ -189,6 +192,7 @@ namespace DepthToColor
                 }
             }
 
+            return ArrayList; 
         }//end PollData
 
 
@@ -196,7 +200,9 @@ namespace DepthToColor
         //::::::::::::::::::::Stop tyhe sensor:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
-
+            Kinect.ColorStream.Disable();
+            Kinect.DepthStream.Disable();
+            Kinect.Stop();
         } 
         //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
