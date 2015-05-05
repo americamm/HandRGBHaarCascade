@@ -40,22 +40,21 @@ namespace DepthToColor
         private short[] DepthValues;
         private byte[] output;
 
-        private Image<Bgra, Byte> ImagenColor;
-        private Image<Gray, Byte> ImagenDepth;
-        private Image<Bgra, Byte> ImagenMappedDepth; 
+        //private Image<Bgra, Byte> ImagenColor;
+        //private Image<Gray, Byte> ImagenDepth;
+        //private Image<Bgra, Byte> ImagenMappedDepth; 
 
         private WriteableBitmap colorWBitmap;
         private Int32Rect RectColor;
         private int StrideColor;
-        private WriteableBitmap outputWBitmap;
-        private Int32Rect RectOutput;
-        private int StrideOutput; 
         private WriteableBitmap depthWBitmap;
         private Int32Rect RectDepth;
         private int StrideDepth;
 
         private CascadeClassifier haarColor;
-        private CascadeClassifier haarDepth; 
+        private CascadeClassifier haarDepth;
+
+        private int contador = 0;  
         //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
@@ -99,13 +98,12 @@ namespace DepthToColor
 
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
-        {
-            List<byte[]> kinectArrayBytes = new List<byte[]>(3);
+        {   
+            //:::::::::::Variables:::::::::::::::::::::::::::::::::::::::::::::::
+            List<byte[]> kinectArrayBytes = new List<byte[]>(2);
             List<object> return1 = new List<object>(2);
             List<object> return2 = new List<object>(2);
-            List<object> return3 = new List<object>(2);
 
-            Image<Bgra, Byte> imagenColor = new Image<Bgra,Byte>(640,480);
             Image<Gray, Byte> imagenDepth = new Image<Gray, Byte>(640,480);
             Image<Bgra, Byte> imagenMapped = new Image<Bgra,Byte>(640,480);
 
@@ -113,51 +111,57 @@ namespace DepthToColor
             Image<Gray, Byte> mappedDetection = new Image<Gray, Byte>(640, 480); 
             Image<Gray, Byte> depthDetection = new Image<Gray, Byte>(640, 480);
 
-            System.Drawing.Rectangle[] HandsColor;
             System.Drawing.Rectangle[] HandsDepth;
-            System.Drawing.Rectangle[] HandsBoth; 
-             
+            System.Drawing.Rectangle[] HandsBoth;
+
+            List<System.Drawing.Rectangle> ListRectangles; 
+            //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+ 
             
             kinectArrayBytes = PollData();
 
-            imagenColor.Bytes = kinectArrayBytes[0];
-            imagenDepth.Bytes = kinectArrayBytes[1];
-            imagenMapped.Bytes = kinectArrayBytes[2]; 
+            imagenDepth.Bytes = kinectArrayBytes[0];
+            imagenMapped.Bytes = kinectArrayBytes[1]; 
 
             //Preposesing imagen for the detection, remove of noise in the image of depth and covertionsof color image. 
             depthDetection = imagenDepth.SmoothMedian(3);
-            colorDetection = imagenColor.Convert<Gray, Byte>();
             mappedDetection = imagenMapped.Convert<Gray, Byte>();
 
             //Detection of the hand 
-            return1 = Detection(haarColor, colorDetection);
-            return2 = Detection(haarColor, mappedDetection);
-            return3 = Detection(haarDepth, depthDetection); 
+            return1 = Detection(haarColor, mappedDetection);
+            return2 = Detection(haarDepth, depthDetection); 
             
-            //Cast to his respdctive data type 
-            HandsColor = (System.Drawing.Rectangle[])return1[0];
-            HandsBoth = (System.Drawing.Rectangle[])return2[0];
-            HandsDepth = (System.Drawing.Rectangle[])return3[0];
-            colorDetection = (Image<Gray,Byte>)return1[1];
-            mappedDetection = (Image<Gray, Byte>)return2[1];
-            depthDetection = (Image<Gray, Byte>)return3[1]; 
+            //Cast to his respective data type 
+
+            HandsBoth = (System.Drawing.Rectangle[])return1[0];
+            HandsDepth = (System.Drawing.Rectangle[])return2[0];
+            mappedDetection = (Image<Gray, Byte>)return1[1];
+            depthDetection = (Image<Gray, Byte>)return2[1]; 
+
+            //See if the roi of are hand are intersercted
+            ListRectangles = handDetection(HandsBoth, HandsDepth);
+            
+            foreach (System.Drawing.Rectangle roi in ListRectangles)
+            {
+                Gray colorcillo = new Gray(double.MinValue);
+                mappedDetection.Draw(roi, colorcillo, 3);
+            } 
+            mappedDetection.Save(@"C:\images\" + contador.ToString() + ".png");
+            contador++; 
 
             //Convert to bgra for the display 
-            imagenColor = colorDetection.Convert<Bgra, Byte>();
             imagenMapped = mappedDetection.Convert<Bgra, Byte>();
 
             //Display the images
-            colorImage.Source = colorWriteablebitmap(imagenColor);
             DepthAndColorImage.Source = colorWriteablebitmap(imagenMapped);
             depthImage.Source = depthWriteablebitmap(depthDetection); 
-
 
         }//end CompositionTarget_Rendering
 
 
         private List<byte[]> PollData()
         {
-            List<byte[]> ArrayList = new List<byte[]>(); 
+            List<byte[]> ArrayList = new List<byte[]>(2); 
 
             if (this.Kinect != null)
             {   
@@ -218,7 +222,6 @@ namespace DepthToColor
                                 output[outputIndex + 2] = ColorPixeles[colorPixelIndex + 2];
                             }
 
-                            ArrayList.Add(ColorPixeles);
                             ArrayList.Add(DepthPixeles);
                             ArrayList.Add(output);
                         }
@@ -271,13 +274,13 @@ namespace DepthToColor
 
             if (frame != null)
             {
-                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.4, -1, new System.Drawing.Size(frame.Width / 9, frame.Height / 9), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
+                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.4, 0, new System.Drawing.Size(frame.Width / 9, frame.Height / 9), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
 
-                foreach (System.Drawing.Rectangle roi in hands)
+                /*foreach (System.Drawing.Rectangle roi in hands)
                 {
                     Gray colorcillo = new Gray(double.MaxValue);
-                    frame.Draw(roi, colorcillo, 3);
-                }
+                    frame.Draw(roi, colorcillo, 1);
+                }*/
 
                 returnDetection.Add(hands); 
                 returnDetection.Add(frame);
@@ -287,19 +290,31 @@ namespace DepthToColor
         }//finaliza detection()  
 
 
-        private void handDetection(System.Drawing.Rectangle[] ColorRA, System.Drawing.Rectangle[] DepthRA) 
+        //Method for detect if the rectangles of color and depth 0are intersecteds 
+        private List<System.Drawing.Rectangle>  handDetection(System.Drawing.Rectangle[] ColorRA, System.Drawing.Rectangle[] DepthRA) 
         {
-            List<System.Drawing.Rectangle[]> ListRect = new List<System.Drawing.Rectangle[]>();
-            System.Drawing.Rectangle[] ArrayRect = new System.Drawing.Rectangle[2]; 
+            List<System.Drawing.Rectangle> ListRectUnion = new List<System.Drawing.Rectangle>();
+            //System.Drawing.Rectangle RectUnion; 
+            
+            //List<System.Drawing.Rectangle[]> ListRect = new List<System.Drawing.Rectangle[]>();
+            //System.Drawing.Rectangle[] ArrayRect = new System.Drawing.Rectangle[2]; 
 
             foreach (System.Drawing.Rectangle rect1 in ColorRA)
             {
                 foreach (System.Drawing.Rectangle rect2 in DepthRA)
-                { 
-                
+                {
+                    if (rect1.IntersectsWith(rect2))
+                    {
+                        ListRectUnion.Add(System.Drawing.Rectangle.Union(rect1,rect2)); 
+                        //ArrayRect[0] = rect1;
+                        //ArrayRect[1] = rect2;
+                        //ListRect.Add(ArrayRect); 
+                    }
                 }
             }
-        }
+
+            return ListRectUnion; 
+        }// end handDetection 
 
         //::::::::::::::::::::Stop tyhe sensor:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         private void Window_Unloaded(object sender, RoutedEventArgs e)
