@@ -59,7 +59,7 @@ namespace HDAssariDepth
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            haarDepth = new CascadeClassifier(@"C:\Users\America\Documents\HandRGBHaarCascade\Classifiers\cascade.xml"); 
+            haarDepth = new CascadeClassifier(@"C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\Classifiers\cascade.xml"); 
             FindKinect();
             CompositionTarget.Rendering += new EventHandler(CompositionTarget_Rendering); 
         }
@@ -105,8 +105,9 @@ namespace HDAssariDepth
             System.Drawing.Rectangle[] HandsBoth;
 
             List<System.Drawing.Rectangle> ListRectangles;
-            //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+            List<Image<Gray, Byte>> listHandColor; 
+            //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
             kinectArrayBytes = PollData();
 
@@ -127,6 +128,7 @@ namespace HDAssariDepth
             HandsDepth = (System.Drawing.Rectangle[])return2[0]; 
             depthDetection = (Image<Gray, Byte>)return2[1];
 
+            listHandColor = rectanglesFrameColor(mappedDetection, HandsDepth); 
 
 
             //Convert to bgra for the display 
@@ -268,6 +270,60 @@ namespace HDAssariDepth
 
             return returnDetection;
         }//finaliza detection()  
+
+
+        private List<Image<Gray, Byte>> rectanglesFrameColor(Image<Gray, Byte> frameColor, System.Drawing.Rectangle[] roiArray)
+        {
+            List<Image<Gray, Byte>> roiColor = new List<Image<Gray, Byte>>();
+            Image<Gray, Byte> imageGray; 
+            Image<Ycc,Byte> imageYcc; 
+
+            foreach (System.Drawing.Rectangle roi in roiArray)
+            {
+                imageGray = frameColor.Clone();
+                imageYcc = imageGray.Convert<Ycc, Byte>(); 
+                imageYcc.ROI = roi;
+                imageGray = SkinColorSegmentation(imageYcc); 
+                roiColor.Add(imageGray);
+            }
+
+            return roiColor; 
+        }//end rectanglesFrameColor 
+
+
+        private Image<Gray,Byte> SkinColorSegmentation(Image<Ycc, Byte> FrameYcc)
+        {
+            int filas = FrameYcc.Width;
+            int columnas = FrameYcc.Height; 
+            double mediaCr = 149.7692;
+            double mediaCb = 114.3846;
+            double deCr = 13.80914;
+            double deCb = 7.136041;
+            
+            Image<Gray, Byte> GrayImage = new Image<Gray,Byte>(filas,columnas); 
+            byte[, ,] bytesGrayImagen = new byte[filas, columnas, 1];
+            byte[, ,] arregloBytes = new byte[filas, columnas, 3]; 
+            
+            double izqCr = mediaCr - deCr;
+            double derCr = mediaCr + deCr;
+            double izqCb = mediaCb - deCb;
+            double derCb = mediaCb + deCb;
+            arregloBytes = FrameYcc.Data; 
+
+            for (int i = 0; i < filas; i++)
+            {
+                for (int j = 0; j < columnas; j++)
+                {
+                    if ((izqCr < arregloBytes[i, j, 1]) && (arregloBytes[i, j, 1] < derCr) && (izqCb < arregloBytes[i, j, 2]) && (arregloBytes[i, j, 2] < derCb))
+                        bytesGrayImagen[i, j, 0] = 255;
+                }
+            }
+
+            GrayImage.Data = bytesGrayImagen;
+
+            return GrayImage; 
+        }//end SkinColorSegmentation 
+
 
 
         //::::::::::::::::::::Stop tyhe sensor:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
