@@ -59,7 +59,7 @@ namespace HDAssariDepth
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            haarDepth = new CascadeClassifier(@"C:\Users\AmericaIvone\Documents\HandRGBHaarCascade\Classifiers\cascade.xml"); 
+            haarDepth = new CascadeClassifier(@"C:\Users\America\Documents\HandRGBHaarCascade\Classifiers\cascade.xml"); 
             FindKinect();
             CompositionTarget.Rendering += new EventHandler(CompositionTarget_Rendering); 
         }
@@ -104,40 +104,49 @@ namespace HDAssariDepth
             System.Drawing.Rectangle[] HandsDepth;
             System.Drawing.Rectangle[] HandsBoth;
 
-            List<System.Drawing.Rectangle> ListRectangles;
-
-            List<Image<Gray, Byte>> listHandColor; 
+            List<System.Drawing.Rectangle> ListRectangles; 
+            List<Image<Gray, Byte>> listHandColor;
+            List<int> indexFrames; 
             //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
+            
             kinectArrayBytes = PollData();
 
-            imagenDepth.Bytes = kinectArrayBytes[0];
-            imagenMapped.Bytes = kinectArrayBytes[1];
+            if (kinectArrayBytes.Count != 0)
+            {
+                imagenDepth.Bytes = kinectArrayBytes[0];
+                imagenMapped.Bytes = kinectArrayBytes[1];
 
-            //Preposesing imagen for the detection, remove of noise in the image of depth and covertionsof color image. 
-            depthDetection = imagenDepth.SmoothMedian(3);
-            mappedDetection = imagenMapped.Convert<Gray, Byte>();
+                //Preposesing imagen for the detection, remove of noise in the image of depth and covertionsof color image. 
+                depthDetection = imagenDepth.SmoothMedian(3);
 
-            //Detection of the hand 
-            //return1 = Detection(haarColor, mappedDetection);
-            return2 = Detection(haarDepth, depthDetection);
+                //Detection of the hand 
+                //return1 = Detection(haarColor, mappedDetection);
+                return2 = Detection(haarDepth, depthDetection);
 
-            //Cast to his respective data type 
-            //HandsBoth = (System.Drawing.Rectangle[])return1[0];
-            //mappedDetection = (Image<Gray, Byte>)return1[1];
-            HandsDepth = (System.Drawing.Rectangle[])return2[0]; 
-            depthDetection = (Image<Gray, Byte>)return2[1];
+                //Cast to his respective data type 
+                //HandsBoth = (System.Drawing.Rectangle[])return1[0];
+                //mappedDetection = (Image<Gray, Byte>)return1[1];
+                HandsDepth = (System.Drawing.Rectangle[])return2[0]; 
+                depthDetection = (Image<Gray, Byte>)return2[1];
 
-            listHandColor = rectanglesFrameColor(mappedDetection, HandsDepth); 
+                listHandColor = rectanglesFrameColor(imagenMapped, HandsDepth); //Binary images from the hand
+                indexFrames = FindHandColorRoi(listHandColor);
 
+                if (indexFrames.Count != 0)
+                {
+                    imagenMapped = DrawRoiMappedImage(imagenMapped, HandsDepth, indexFrames);
+                    //imagenMapped = mappedDetection.Convert<Bgra, Byte>(); //Convert to bgra for the display 
+                }
 
-            //Convert to bgra for the display 
-            imagenMapped = mappedDetection.Convert<Bgra, Byte>();
+                //Display the images
+                DepthAndColorImage.Source = colorWriteablebitmap(imagenMapped);
+                DepthImage.Source = depthWriteablebitmap(depthDetection);
+            }//end if  
+        }
 
-            //Display the images
-            //DepthAndColorImage.Source = colorWriteablebitmap(imagenMapped);
-            DepthImage.Source = depthWriteablebitmap(depthDetection);
-
+        private Image<Gray, byte> DrawHandMappedImage()
+        {
+            throw new NotImplementedException();
         }//end CompositionTarget_Rendering
 
 
@@ -256,12 +265,12 @@ namespace HDAssariDepth
 
             if (frame != null)
             {
-                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.4, 0, new System.Drawing.Size(frame.Width / 9, frame.Height / 9), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
+                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.4, 1, new System.Drawing.Size(frame.Width / 9, frame.Height / 9), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
 
                 foreach (System.Drawing.Rectangle roi in hands)
                 {
                     Gray colorcillo = new Gray(double.MaxValue);
-                    frame.Draw(roi, colorcillo, 1);
+                    frame.Draw(roi, colorcillo, 3);
                 }
 
                 returnDetection.Add(hands);
@@ -272,17 +281,19 @@ namespace HDAssariDepth
         }//finaliza detection()  
 
 
-        private List<Image<Gray, Byte>> rectanglesFrameColor(Image<Gray, Byte> frameColor, System.Drawing.Rectangle[] roiArray)
+        private List<Image<Gray, Byte>> rectanglesFrameColor(Image<Bgra, Byte> frameColor, System.Drawing.Rectangle[] roiArray)
         {
             List<Image<Gray, Byte>> roiColor = new List<Image<Gray, Byte>>();
+            Image<Bgra, Byte> imagen; 
+            Image<Ycc,Byte> imageYcc;
             Image<Gray, Byte> imageGray; 
-            Image<Ycc,Byte> imageYcc; 
 
             foreach (System.Drawing.Rectangle roi in roiArray)
             {
-                imageGray = frameColor.Clone();
-                imageYcc = imageGray.Convert<Ycc, Byte>(); 
-                imageYcc.ROI = roi;
+                imagen = frameColor.Clone();
+                imagen.ROI = roi; 
+                imageYcc = imagen.Convert<Ycc, Byte>();  
+
                 imageGray = SkinColorSegmentation(imageYcc); 
                 roiColor.Add(imageGray);
             }
@@ -293,8 +304,8 @@ namespace HDAssariDepth
 
         private Image<Gray,Byte> SkinColorSegmentation(Image<Ycc, Byte> FrameYcc)
         {
-            int filas = FrameYcc.Width;
-            int columnas = FrameYcc.Height; 
+            int filas = FrameYcc.Height;
+            int columnas = FrameYcc.Width; 
             double mediaCr = 149.7692;
             double mediaCb = 114.3846;
             double deCr = 13.80914;
@@ -325,8 +336,46 @@ namespace HDAssariDepth
         }//end SkinColorSegmentation 
 
 
+        private List<int> FindHandColorRoi(List<Image<Gray, Byte>> ColorRoi)
+        { 
+            List<int> ListIndex = new List<int>();
+            Image<Gray, Byte> ImageComparation; 
+            
+            int index=0;  
+            Gray colorcillo = new Gray(0); 
 
-        //::::::::::::::::::::Stop tyhe sensor:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            foreach (Image<Gray, Byte> imagen in ColorRoi)
+            { 
+                ImageComparation = new Image<Gray, Byte>(imagen.Width, imagen.Height, colorcillo); 
+                if (imagen.Equals(ImageComparation) == false)
+                {
+                    ListIndex.Add(index); 
+                } 
+                index++; 
+            }
+
+            return ListIndex; 
+        }//end 
+
+
+        private Image<Bgra,Byte> DrawRoiMappedImage(Image<Bgra,Byte> MappedImage, System.Drawing.Rectangle[] RoiArray, List<int> indexArray) 
+        {
+            Bgra negro = new Bgra(0,0,0,0);
+            Bgra verde = new Bgra(0, 255, 0, 0);
+
+            foreach(int index in indexArray) //acomodar es en cada indice son todos los values; 
+            {
+                MappedImage.Draw(RoiArray[index], negro, 3); 
+            }
+            foreach (System.Drawing.Rectangle roi in RoiArray)
+            {
+                MappedImage.Draw(roi, verde, 4);
+            }
+
+            return MappedImage;            
+        }//end 
+ 
+        //::::::::::::::::::::Stop tyhe sensor:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
             Kinect.ColorStream.Disable();
