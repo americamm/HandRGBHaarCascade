@@ -67,7 +67,7 @@ namespace DepthToColor
         //::::::::::::::::::::Call all methods:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            haarColor = new CascadeClassifier(@"C:\Users\America\Documents\HandRGBHaarCascade\Classifiers\1\1256617233-1-haarcascade_hand.xml"); //La compu de escritorio
+            haarColor = new CascadeClassifier(@"C:\Users\America\Documents\HandRGBHaarCascade\Classifiers\2\palm.xml"); //La compu de escritorio
             haarDepth = new CascadeClassifier(@"C:\Users\America\Documents\HandRGBHaarCascade\Classifiers\cascade.xml");
 
             FindKinect();
@@ -117,45 +117,47 @@ namespace DepthToColor
             List<System.Drawing.Rectangle> ListRectangles; 
             //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
  
-            
             kinectArrayBytes = PollData();
 
-            imagenDepth.Bytes = kinectArrayBytes[0];
-            imagenMapped.Bytes = kinectArrayBytes[1]; 
-
-            //Preposesing imagen for the detection, remove of noise in the image of depth and covertionsof color image. 
-            depthDetection = imagenDepth.SmoothMedian(3);
-            mappedDetection = imagenMapped.Convert<Gray, Byte>();
-
-            //Detection of the hand 
-            return1 = Detection(haarColor, mappedDetection);
-            return2 = Detection(haarDepth, depthDetection); 
-            
-            //Cast to his respective data type 
-
-            HandsBoth = (System.Drawing.Rectangle[])return1[0];
-            HandsDepth = (System.Drawing.Rectangle[])return2[0];
-            mappedDetection = (Image<Gray, Byte>)return1[1];
-            depthDetection = (Image<Gray, Byte>)return2[1]; 
-
-            //See if the roi of are hand are intersercted
-            ListRectangles = handDetection(HandsBoth, HandsDepth);
-            
-            foreach (System.Drawing.Rectangle roi in ListRectangles)
+            if (kinectArrayBytes.Count == 2)
             {
-                Gray colorcillo = new Gray(double.MinValue);
-                mappedDetection.Draw(roi, colorcillo, 3);
-            } 
-            mappedDetection.Save(@"C:\images\" + contador.ToString() + ".png");
-            contador++; 
+                imagenDepth.Bytes = kinectArrayBytes[0];
+                imagenMapped.Bytes = kinectArrayBytes[1];
 
-            //Convert to bgra for the display 
-            imagenMapped = mappedDetection.Convert<Bgra, Byte>();
+                //Preposesing imagen for the detection, remove of noise in the image of depth and covertionsof color image. 
+                depthDetection = imagenDepth.SmoothMedian(3);
+                mappedDetection = imagenMapped.Convert<Gray, Byte>();
 
-            //Display the images
-            DepthAndColorImage.Source = colorWriteablebitmap(imagenMapped);
-            depthImage.Source = depthWriteablebitmap(depthDetection); 
+                //Detection of the hand 
+                return1 = Detection(haarColor, mappedDetection);
+                return2 = Detection(haarDepth, depthDetection);
 
+                //Cast to his respective data type 
+
+                HandsBoth = (System.Drawing.Rectangle[])return1[0];
+                HandsDepth = (System.Drawing.Rectangle[])return2[0];
+                mappedDetection = (Image<Gray, Byte>)return1[1];
+                depthDetection = (Image<Gray, Byte>)return2[1];
+
+                //See if the roi of are hand are intersercted
+                ListRectangles = handDetection(HandsBoth, HandsDepth);
+
+                foreach (System.Drawing.Rectangle roi in ListRectangles)
+                {
+                    Gray colorcillo = new Gray(double.MinValue);
+                    mappedDetection.Draw(roi, colorcillo, 3);
+                }
+                mappedDetection.Save(@"C:\images\" + contador.ToString() + ".png");
+                contador++;
+
+                //Convert to bgra for the display 
+                imagenMapped = mappedDetection.Convert<Bgra, Byte>();
+
+                //Display the images
+                DepthAndColorImage.Source = colorWriteablebitmap(imagenMapped);
+                depthImage.Source = depthWriteablebitmap(depthDetection); 
+
+            }//end if
         }//end CompositionTarget_Rendering
 
 
@@ -274,13 +276,13 @@ namespace DepthToColor
 
             if (frame != null)
             {
-                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.4, 0, new System.Drawing.Size(frame.Width / 9, frame.Height / 9), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
+                System.Drawing.Rectangle[] hands = haar.DetectMultiScale(frame, 1.3, 0, new System.Drawing.Size(frame.Width / 7, frame.Height / 7), new System.Drawing.Size(frame.Width / 4, frame.Height / 4));
 
-                /*foreach (System.Drawing.Rectangle roi in hands)
+                foreach (System.Drawing.Rectangle roi in hands)
                 {
                     Gray colorcillo = new Gray(double.MaxValue);
                     frame.Draw(roi, colorcillo, 1);
-                }*/
+                }
 
                 returnDetection.Add(hands); 
                 returnDetection.Add(frame);
